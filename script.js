@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const lastHourData = getLastHourData(csvData);
                 updateCurrentValues(csvData); // Update with the latest data
                 updateMinMaxValues(lastHourData); // Update min/max values for the last hour
+                updateStatusTexts(csvData); // Update status texts
                 localStorage.setItem('csvData', text); // Store CSV data in localStorage
             };
             reader.readAsText(file, 'ISO-8859-1');
@@ -90,54 +91,77 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('max-humidity').innerText = humidityValues.length ? maxHumidity : 'N/A';
     }
 
+    function updateStatusTexts(data) {
+        const latestData = data[data.length - 1];
+        const co2 = parseFloat(latestData['CO2 ppm']) || 'N/A';
+        const temperature = parseFloat(latestData['Temperature Â°C']) || 'N/A';
+        const humidity = parseFloat(latestData['RH %']) || 'N/A';
+
+        // Update status text for temperature
+        if (temperature === 'N/A') {
+            document.getElementById('status-text-temperature').innerHTML = 'Temperatūros duomenų nėra.';
+        } else if (temperature >= 22 && temperature <= 24) {
+            document.getElementById('status-text-temperature').innerHTML = 'Temperatūra yra optimali.';
+        } else if (temperature < 22) {
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${22 - temperature}°C žemesnė nei optimali.`;
+        } else {
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${temperature - 24}°C aukštesnė nei optimali.`;
+        }
+
+        // Update status text for CO2
+        if (co2 === 'N/A') {
+            document.getElementById('status-text-co2').innerHTML = 'CO2 duomenų nėra.';
+        } else if (co2 <= 750) {
+            document.getElementById('status-text-co2').innerHTML = 'CO2 lygis yra optimalus.';
+        } else if (co2 > 750 && co2 <= 1000) {
+            document.getElementById('status-text-co2').innerHTML = 'Atidarykite langą 20 minučių.';
+        } else {
+            document.getElementById('status-text-co2').innerHTML = 'Atidarykite langą 30 minučių.';
+        }
+
+        // Update status text for humidity
+        if (humidity === 'N/A') {
+            document.getElementById('status-text-humidity').innerHTML = 'Drėgmės duomenų nėra.';
+        } else if (humidity >= 40 && humidity <= 60) {
+            document.getElementById('status-text-humidity').innerHTML = 'Drėgnumas yra optimalus.';
+        } else if (humidity < 40) {
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėkintuvą.';
+        } else {
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėgmės ištraukėją.';
+        }
+    }
+
     function calculateScore(co2, temperature, humidity) {
         let score = 0;
         let co2score = 0;
-        let tempscore=0;
+        let tempscore = 0;
+
         // CO2 scoring
-        if ( co2 <= 750) {
+        if (co2 <= 750) {
             score += 40; // Perfect score for CO2
-        } else if(co2>750){
-            co2score+= 40-((co2-750)/10)
-            if(co2score<0)
-                {
-                    score+=0;
-                }
-                else{
-                    score +=co2score
-                }
+        } else if (co2 > 750) {
+            co2score += 40 - ((co2 - 750) / 10);
+            score += co2score < 0 ? 0 : co2score;
         }
 
         // Temperature scoring
         if (temperature >= 22 && temperature <= 24) {
             score += 35; // Perfect score for temperature
-        } else if (temperature < 22 ) {
-            tempscore += 35-((22-temperature)*5);
-            if (tempscore<0)
-                {
-                    score+=0;
-                }
-                else{
-                    score+=tempscore;
-                }
+        } else if (temperature < 22) {
+            tempscore += 35 - ((22 - temperature) * 5);
+            score += tempscore < 0 ? 0 : tempscore;
         } else {
-            tempscore += 35-((temperature-24)*5);
-            if (tempscore<0)
-                {
-                    score+=0;
-                }
-                else{
-                    score+=tempscore;
-                }
+            tempscore += 35 - ((temperature - 24) * 5);
+            score += tempscore < 0 ? 0 : tempscore;
         }
 
         // Humidity scoring
         if (humidity >= 40 && humidity <= 60) {
             score += 25; // Perfect score for humidity
-        } else if (humidity>60) {
-            score += 25-((humidity-60)/40)*25; // Moderate score for humidity
+        } else if (humidity > 60) {
+            score += 25 - ((humidity - 60) / 40) * 25; // Moderate score for humidity
         } else {
-            score += (humidity/40)*25; // Low score for humidity
+            score += (humidity / 40) * 25; // Low score for humidity
         }
 
         return score;
