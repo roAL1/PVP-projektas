@@ -1,251 +1,196 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f4f8;
-    margin: 0;
-    text-align: center;
-    padding: 20px;
-    box-sizing: border-box;
-}
+document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('fileInput');
 
-nav {
-    width: 100%;
-    background-color: #333;
-    padding: 10px 0;
-}
+    fileInput.addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                const csvData = parseCSV(text);
+                const lastHourData = getLastHourData(csvData);
+                updateCurrentValues(csvData); // Update with the latest data
+                updateMinMaxValues(lastHourData); // Update min/max values for the last hour
+                updateStatusTexts(csvData); // Update status texts
+                localStorage.setItem('csvData', text); // Store CSV data in localStorage
+            };
+            reader.readAsText(file, 'ISO-8859-1');
+        }
+    });
 
-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: center;
-}
-
-nav ul li {
-    margin: 0 15px;
-}
-
-nav ul li a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-nav ul li a:hover {
-    text-decoration: underline;
-}
-
-/* Wrapper for both containers */
-.content-wrapper {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 20px;
-    gap: 20px; /* Optional: adds space between the containers */
-}
-
-.container {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    width: 45%; /* Original width for PC */
-    text-align: left; /* Align text to the left within the container */
-    box-sizing: border-box;
-}
-
-.left-container {
-    flex: 1;
-}
-
-.right-container {
-    flex: 2;
-    text-align: center; /* Center the content within the right container */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.reading {
-    margin-bottom: 20px;
-}
-
-.reading label {
-    display: block;
-    font-size: 16px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #666;
-}
-
-.reading input[type="range"] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 10px;
-    border-radius: 5px;
-    outline: none;
-    opacity: 0.8;
-    transition: opacity .15s ease-in-out;
-}
-
-#co2 {
-    background: linear-gradient(to right, green, green, red, red);
-}
-
-#temperature {
-    background: linear-gradient(to right, red, green, red);
-}
-
-#humidity {
-    background: linear-gradient(to right, red, green, red);
-}
-
-.reading input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #fff;
-    border: 2px solid #888;
-    cursor: pointer;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-}
-
-.reading input[type="range"]:disabled::-webkit-slider-thumb {
-    background: #fff;
-    border: 2px solid #888;
-}
-
-.reading .values {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 14px;
-    color: #333;
-}
-
-.reading .current-value {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #555;
-}
-
-p {
-    font-size: 16px;
-    color: #555;
-    margin-top: 20px;
-    font-weight: bold;
-}
-
-canvas {
-    margin-top: 20px;
-}
-
-/* New Styles for Graphs Container */
-#graphs-container {
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 1200px;
-    margin: 40px auto;
-    box-sizing: border-box;
-    overflow: auto;
-}
-
-#graphs-container h1 {
-    font-size: 28px;
-    margin-bottom: 30px;
-    color: #333;
-}
-
-/* Canvas Styles for Larger Graphs */
-#graphs-container canvas {
-    margin-top: 20px;
-    margin-bottom: 40px;
-    max-width: 100%;
-    height: 400px;
-}
-
-/* Responsive Design for Tablets and Phones */
-@media (max-width: 1024px) {
-    .content-wrapper {
-        flex-direction: column;
+    function parseCSV(text) {
+        const rows = text.trim().split('\n').map(row => row.split(';'));
+        const headers = rows.shift();
+        return rows.map(row => Object.fromEntries(row.map((val, i) => [headers[i].trim(), val.trim()])));
     }
 
-    .container {
-        width: 100%; /* Full width for smaller screens */
+    function getLastHourData(data) {
+        const latestEntry = data[data.length - 1];
+        const latestDate = moment(latestEntry['Date and time'], 'DD/MM/YYYY HH:mm:ss');
+        const cutoffTime = latestDate.subtract(1, 'hours');
+
+        return data.filter(row => {
+            const dateTime = moment(row['Date and time'], 'DD/MM/YYYY HH:mm:ss');
+            return dateTime.isSameOrAfter(cutoffTime);
+        });
     }
 
-    .speedometer-container {
-        flex-direction: column;
-        align-items: center;
+    function updateCurrentValues(data) {
+        const latestData = data[data.length - 1];
+        const co2 = parseFloat(latestData['CO2 ppm']) || 'N/A';
+        const temperature = parseFloat(latestData['Temperature Â°C']) || 'N/A';
+        const humidity = parseFloat(latestData['RH %']) || 'N/A';
+        
+        // Update text values
+        document.getElementById('current-co2').innerText = co2;
+        document.getElementById('current-temperature').innerText = temperature;
+        document.getElementById('current-humidity').innerText = humidity;
+        
+        // Update input range values
+        document.getElementById('co2').value = co2;
+        document.getElementById('temperature').value = temperature;
+        document.getElementById('humidity').value = humidity;
+        
+        // Update value labels
+        document.getElementById('co2-value').innerText = co2;
+        document.getElementById('temperature-value').innerText = temperature;
+        document.getElementById('humidity-value').innerText = humidity;
+
+        // Calculate and update score
+        const score = calculateScore(co2, temperature, humidity);
+        gauge.refresh(score);
     }
 
-    .min-max-values {
-        margin-right: 0;
-        margin-bottom: 20px;
-        align-items: center;
+    function updateMinMaxValues(data) {
+        if (data.length === 0) {
+            document.getElementById('min-co2').innerText = 'N/A';
+            document.getElementById('max-co2').innerText = 'N/A';
+            document.getElementById('min-temperature').innerText = 'N/A';
+            document.getElementById('max-temperature').innerText = 'N/A';
+            document.getElementById('min-humidity').innerText = 'N/A';
+            document.getElementById('max-humidity').innerText = 'N/A';
+            return;
+        }
+
+        const co2Values = data.map(row => parseFloat(row['CO2 ppm'])).filter(val => !isNaN(val));
+        const temperatureValues = data.map(row => parseFloat(row['Temperature Â°C'])).filter(val => !isNaN(val));
+        const humidityValues = data.map(row => parseFloat(row['RH %'])).filter(val => !isNaN(val));
+
+        const minCo2 = Math.min(...co2Values);
+        const maxCo2 = Math.max(...co2Values);
+        const minTemperature = Math.min(...temperatureValues);
+        const maxTemperature = Math.max(...temperatureValues);
+        const minHumidity = Math.min(...humidityValues);
+        const maxHumidity = Math.max(...humidityValues);
+
+        document.getElementById('min-co2').innerText = co2Values.length ? minCo2 : 'N/A';
+        document.getElementById('max-co2').innerText = co2Values.length ? maxCo2 : 'N/A';
+        document.getElementById('min-temperature').innerText = temperatureValues.length ? minTemperature : 'N/A';
+        document.getElementById('max-temperature').innerText = temperatureValues.length ? maxTemperature : 'N/A';
+        document.getElementById('min-humidity').innerText = humidityValues.length ? minHumidity : 'N/A';
+        document.getElementById('max-humidity').innerText = humidityValues.length ? maxHumidity : 'N/A';
     }
 
-    .min-values, .max-values {
-        text-align: left; /* Ensure text is left-aligned on smaller screens */
-    }
-}
+    function updateStatusTexts(data) {
+        const latestData = data[data.length - 1];
+        const co2 = parseFloat(latestData['CO2 ppm']) || 'N/A';
+        const temperature = parseFloat(latestData['Temperature Â°C']) || 'N/A';
+        const humidity = parseFloat(latestData['RH %']) || 'N/A';
 
-@media (min-width: 1025px) {
-    .content-wrapper {
-        flex-direction: row;
+        // Update status text for temperature
+        if (temperature === 'N/A') {
+            document.getElementById('status-text-temperature').innerHTML = 'Temperatūros duomenų nėra.';
+        } else if (temperature >= 22 && temperature <= 24) {
+            document.getElementById('status-text-temperature').innerHTML = 'Temperatūra yra optimali.';
+        } else if (temperature < 22) {
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${Math.floor(22 - temperature)}°C žemesnė nei optimali.`;
+        } else {
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${Math.floor(temperature - 24)}°C aukštesnė nei optimali.`;
+        }
+
+        // Update status text for CO2
+        if (co2 === 'N/A') {
+            document.getElementById('status-text-co2').innerHTML = 'CO2 duomenų nėra.';
+        } else if (co2 <= 750) {
+            document.getElementById('status-text-co2').innerHTML = 'CO2 lygis yra optimalus.';
+        } else if (co2 > 750 && co2 <= 1000) {
+            document.getElementById('status-text-co2').innerHTML = 'Atidarykite langą 20 minučių.';
+        } else {
+            document.getElementById('status-text-co2').innerHTML = 'Atidarykite langą 30 minučių.';
+        }
+
+        // Update status text for humidity
+        if (humidity === 'N/A') {
+            document.getElementById('status-text-humidity').innerHTML = 'Drėgmės duomenų nėra.';
+        } else if (humidity >= 40 && humidity <= 60) {
+            document.getElementById('status-text-humidity').innerHTML = 'Drėgnumas yra optimalus.';
+        } else if (humidity < 40) {
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėkintuvą 30min.';
+        } else {
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėgmės ištraukėją 20min.';
+        }
     }
 
-    .left-container {
-        width: 35%;
+    function calculateScore(co2, temperature, humidity) {
+        let score = 0;
+        let co2score = 0;
+        let tempscore = 0;
+
+        // CO2 scoring
+        if (co2 <= 750) {
+            score += 40; // Perfect score for CO2
+        } else if (co2 > 750) {
+            co2score += 40 - ((co2 - 750) / 10);
+            score += co2score < 0 ? 0 : co2score;
+        }
+
+        // Temperature scoring
+        if (temperature >= 22 && temperature <= 24) {
+            score += 35; // Perfect score for temperature
+        } else if (temperature < 22) {
+            tempscore += 35 - ((22 - temperature) * 5);
+            score += tempscore < 0 ? 0 : tempscore;
+        } else {
+            tempscore += 35 - ((temperature - 24) * 5);
+            score += tempscore < 0 ? 0 : tempscore;
+        }
+
+        // Humidity scoring
+        if (humidity >= 40 && humidity <= 60) {
+            score += 25; // Perfect score for humidity
+        } else if (humidity > 60) {
+            score += 25 - ((humidity - 60) / 40) * 25; // Moderate score for humidity
+        } else {
+            score += (humidity / 40) * 25; // Low score for humidity
+        }
+
+        return score;
     }
 
-    .right-container {
-        width: 65%;
-    }
-
-    .speedometer-container {
-        display: flex;
-        align-items: center;
-    }
-
-    .min-max-values {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        margin-right: 20px;
-    }
-
-    .min-values, .max-values {
-        margin-bottom: 20px;
-    }
-
-    #status-text {
-        margin-left: 20px;
-        text-align: left;
-    }
-
-    .larger-value {
-        font-size: 1.5em; /* Adjust the size as needed */
-    }
-}
-
-/* New class for status texts */
-.status-text {
-    font-size: 16px;
-    color: #555;
-    margin-top: 10px; /* Adjust margin as needed */
-    font-weight: bold;
-}
+    // Speedometer Initialization
+    const gauge = new JustGage({
+        id: 'speedometer',
+        value: 50,
+        min: 0,
+        max: 100,
+        title: 'Speedometer',
+        label: 'Score',
+        gaugeWidthScale: 0.6,
+        counter: true,
+        customSectors: {
+            percents: true, // custom sectors are in percentage
+            ranges: [
+                { color: "#ff0000", lo: 0, hi: 10 },
+                { color: "#ff4000", lo: 11, hi: 20 },
+                { color: "#ff8000", lo: 21, hi: 30 },
+                { color: "#ffbf00", lo: 31, hi: 40 },
+                { color: "#ffff00", lo: 41, hi: 50 },
+                { color: "#ffff33", lo: 51, hi: 60 },
+                { color: "#ffff66", lo: 61, hi: 70 },
+                { color: "#ffff99", lo: 71, hi: 80 },
+                { color: "#00ff00", lo: 81, hi: 90 },
+                { color: "#00ff40", lo: 91, hi: 100 }
+            ]
+        }
+    });
+});
