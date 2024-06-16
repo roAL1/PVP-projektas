@@ -39,7 +39,7 @@ nav ul li a:hover {
 /* Wrapper for both containers */
 .content-wrapper {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: space-between;
     margin-top: 20px;
     gap: 20px; /* Optional: adds space between the containers */
@@ -50,10 +50,9 @@ nav ul li a:hover {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    width: 100%;
+    width: 45%; /* Original width for PC */
     text-align: left; /* Align text to the left within the container */
     box-sizing: border-box;
-    margin-bottom: 20px; /* Added margin for spacing between boxes on smaller screens */
 }
 
 .left-container {
@@ -178,28 +177,14 @@ canvas {
     height: 400px;
 }
 
-/* Responsive Design */
-@media (min-width: 768px) {
-    .content-wrapper {
-        flex-direction: row;
-    }
-
-    .left-container {
-        width: 35%;
-    }
-
-    .right-container {
-        width: 65%;
-    }
-}
-
-@media (max-width: 767px) {
+/* Responsive Design for Tablets and Phones */
+@media (max-width: 1024px) {
     .content-wrapper {
         flex-direction: column;
     }
 
-    .left-container, .right-container {
-        width: 100%;
+    .container {
+        width: 100%; /* Full width for smaller screens */
     }
 
     .speedometer-container {
@@ -212,31 +197,49 @@ canvas {
         margin-bottom: 20px;
         align-items: center;
     }
+
+    .min-values, .max-values {
+        text-align: left; /* Ensure text is left-aligned on smaller screens */
+    }
 }
 
-.speedometer-container {
-    display: flex;
-    align-items: center;
-}
+@media (min-width: 1025px) {
+    .content-wrapper {
+        flex-direction: row;
+    }
 
-.min-max-values {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-right: 20px;
-}
+    .left-container {
+        width: 35%;
+    }
 
-.min-values, .max-values {
-    margin-bottom: 20px;
-}
+    .right-container {
+        width: 65%;
+    }
 
-#status-text {
-    margin-left: 20px;
-    text-align: left;
-}
+    .speedometer-container {
+        display: flex;
+        align-items: center;
+    }
 
-.larger-value {
-    font-size: 1.5em; /* Adjust the size as needed */
+    .min-max-values {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        margin-right: 20px;
+    }
+
+    .min-values, .max-values {
+        margin-bottom: 20px;
+    }
+
+    #status-text {
+        margin-left: 20px;
+        text-align: left;
+    }
+
+    .larger-value {
+        font-size: 1.5em; /* Adjust the size as needed */
+    }
 }
 
 /* New class for status texts */
