@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/raphael/raphael.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/justgage/justgage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-
 </head>
 <body>
     <nav>
@@ -32,9 +31,7 @@
                     <span id="co2-max">2000</span>
                 </div>
                 <div class="current-value">
-                    <span><strong>Dabartinis CO2 kiekis: <span id="current-co2" class="larger-value">1000</span><span class="larger-value"> ppm</span></strong></span>
-
-
+                    <span><strong>Dabartinis CO2 kiekis: <span id="current-co2" class="larger-value">1000</span> ppm</strong></span>
                 </div>
             </div>
             
@@ -47,7 +44,7 @@
                     <span id="temperature-max">35</span>
                 </div>
                 <div class="current-value">
-                    <span><strong>Dabartinė temperatūra: <span id="current-temperature" class="larger-value">22</span><span class="larger-value">°C</span></strong></span>
+                    <span><strong>Dabartinė temperatūra: <span id="current-temperature" class="larger-value">22</span> °C</strong></span>
                 </div>
             </div>
             
@@ -60,7 +57,7 @@
                     <span id="humidity-max">100</span>
                 </div>
                 <div class="current-value">
-                    <span><strong>Dabartinis drėgnumas: <span id="current-humidity" class="larger-value">50</span><span class="larger-value">%</span></strong></span>
+                    <span><strong>Dabartinis drėgnumas: <span id="current-humidity" class="larger-value">50</span> %</strong></span>
                 </div>
             </div>
         </div>
@@ -81,7 +78,11 @@
                     </div>
                 </div>
                 <div id="speedometer" style="width:400px; height:400px;"></div>
-                <p id="status-text">Jūsų darbo mikroklimatas yra optimalus</p>
+                <div id="status-texts">
+                    <p id="status-text-temperature" class="status-text"></p>
+                    <p id="status-text-co2" class="status-text"></p>
+                    <p id="status-text-humidity" class="status-text"></p>
+                </div>
             </div>
         </div>
     </div>
