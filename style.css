@@ -234,6 +234,15 @@ canvas {
     margin-left: 20px;
     text-align: left;
 }
+
 .larger-value {
     font-size: 1.5em; /* Adjust the size as needed */
+}
+
+/* New class for status texts */
+.status-text {
+    font-size: 16px;
+    color: #555;
+    margin-top: 10px; /* Adjust margin as needed */
+    font-weight: bold;
 }
