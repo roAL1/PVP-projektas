@@ -103,9 +103,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (temperature >= 22 && temperature <= 24) {
             document.getElementById('status-text-temperature').innerHTML = 'Temperatūra yra optimali.';
         } else if (temperature < 22) {
-            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${22 - temperature}°C žemesnė nei optimali.`;
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${Math.floor(22 - temperature)}°C žemesnė nei optimali.`;
         } else {
-            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${temperature - 24}°C aukštesnė nei optimali.`;
+            document.getElementById('status-text-temperature').innerHTML = `Temperatūra yra ${Math.floor(temperature - 24)}°C aukštesnė nei optimali.`;
         }
 
         // Update status text for CO2
@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (humidity >= 40 && humidity <= 60) {
             document.getElementById('status-text-humidity').innerHTML = 'Drėgnumas yra optimalus.';
         } else if (humidity < 40) {
-            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėkintuvą.';
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėkintuvą 30min.';
         } else {
-            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėgmės ištraukėją.';
+            document.getElementById('status-text-humidity').innerHTML = 'Įjungti drėgmės ištraukėją 20min.';
         }
     }
 
