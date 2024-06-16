@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microclimate Readings - Last 48 Hours</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="graph.html">Graphs</a></li>
+        </ul>
+    </nav>
+    <div id="graphs-container" class="container">
+        <h1>MIKROKLIMATO RODMENYS (Paskutinės 48 valandos)</h1>
+        <canvas id="temperatureChart" width="800" height="400"></canvas>
+        <canvas id="humidityChart" width="800" height="400"></canvas>
+        <canvas id="co2Chart" width="800" height="400"></canvas>
+    </div>
+    <script src="graph.js"></script>
+</body>
+</html>
